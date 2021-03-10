@@ -17,6 +17,7 @@ module Xlsxtream
 
     DATE_STYLE = 1
     TIME_STYLE = 2
+    FLOAT_STYLE = 3
 
     def initialize(row, rownum, options = {})
       @row = row
@@ -36,6 +37,8 @@ module Xlsxtream
         value = auto_format(value) if @auto_format && value.is_a?(String)
 
         case value
+        when Float
+          xml << %(<c r="#{cid}" s="#{FLOAT_STYLE}" t="n"><v>#{value}</v></c>)
         when Numeric
           xml << %(<c r="#{cid}" t="n"><v>#{value}</v></c>)
         when TrueClass, FalseClass
@@ -43,7 +46,7 @@ module Xlsxtream
         when Time
           xml << %(<c r="#{cid}" s="#{TIME_STYLE}"><v>#{time_to_oa_date(value)}</v></c>)
         when DateTime
-          xml << %(<c r="#{cid}" s="#{TIME_STYLE}"><v>#{datetime_to_oa_date(value)}</v></c>)
+          xml << %(<c r="#{cid}" s="#{DATE_STYLE}"><v>#{datetime_to_oa_date(value)}</v></c>)
         when Date
           xml << %(<c r="#{cid}" s="#{DATE_STYLE}"><v>#{date_to_oa_date(value)}</v></c>)
         else

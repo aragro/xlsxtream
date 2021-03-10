@@ -64,14 +64,14 @@ module Xlsxtream
     def test_float_column
       row = Row.new([1.5], 1)
       actual = row.to_xml
-      expected = '<row r="1"><c r="A1" t="n"><v>1.5</v></c></row>'
+      expected = '<row r="1"><c r="A1" s="3" t="n"><v>1.5</v></c></row>'
       assert_equal expected, actual
     end
 
     def test_text_float_column
       row = Row.new(['1.5'], 1, auto_format: true)
       actual = row.to_xml
-      expected = '<row r="1"><c r="A1" t="n"><v>1.5</v></c></row>'
+      expected = '<row r="1"><c r="A1" s="3" t="n"><v>1.5</v></c></row>'
       assert_equal expected, actual
     end
 
@@ -99,7 +99,7 @@ module Xlsxtream
     def test_date_time_column
       row = Row.new([DateTime.new(1900, 1, 1, 12, 0, 0, '+00:00')], 1)
       actual = row.to_xml
-      expected = '<row r="1"><c r="A1" s="2"><v>2.5</v></c></row>'
+      expected = '<row r="1"><c r="A1" s="1"><v>2.5</v></c></row>'
       assert_equal expected, actual
     end
 
@@ -115,7 +115,7 @@ module Xlsxtream
       candidates.each do |timestamp|
         row = Row.new([timestamp], 1, auto_format: true)
         actual = row.to_xml
-        expected = '<row r="1"><c r="A1" s="2"><v>2.5</v></c></row>'
+        expected = '<row r="1"><c r="A1" s="1"><v>2.5</v></c></row>'
         assert_equal expected, actual
       end
       row = Row.new(['1900-01-01T12'], 1, auto_format: true)

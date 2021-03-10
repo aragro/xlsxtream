@@ -52,7 +52,7 @@ module Xlsxtream
       expected = \
         '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'"\r\n" \
         '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData>' \
-          '<row r="1"><c r="A1" t="n"><v>1.5</v></c></row>' \
+          '<row r="1"><c r="A1" s="3" t="n"><v>1.5</v></c></row>' \
         '</sheetData></worksheet>'
       assert_equal expected, io.string
     end

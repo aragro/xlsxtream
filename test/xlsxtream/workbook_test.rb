@@ -397,10 +397,11 @@ module Xlsxtream
           '<cellStyleXfs count="1">' \
             '<xf numFmtId="0" fontId="0" fillId="0" borderId="0"/>' \
           '</cellStyleXfs>' \
-          '<cellXfs count="3">' \
+          '<cellXfs count="4">' \
             '<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>' \
             '<xf numFmtId="164" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>' \
             '<xf numFmtId="165" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>' \
+            '<xf numFmtId="4" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>' \
           '</cellXfs>' \
           '<cellStyles count="1">' \
             '<cellStyle name="Normal" xfId="0" builtinId="0"/>' \
