@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+require 'bigdecimal'
 require 'date'
 require 'xlsxtream/xml'
 
@@ -39,6 +40,8 @@ module Xlsxtream
         case value
         when Float
           xml << %(<c r="#{cid}" s="#{FLOAT_STYLE}" t="n"><v>#{value}</v></c>)
+        when BigDecimal
+          xml << %(<c r="#{cid}" s="#{FLOAT_STYLE}" t="n"><v>#{value.to_f}</v></c>)
         when Numeric
           xml << %(<c r="#{cid}" t="n"><v>#{value}</v></c>)
         when TrueClass, FalseClass

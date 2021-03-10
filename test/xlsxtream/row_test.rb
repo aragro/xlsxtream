@@ -68,6 +68,13 @@ module Xlsxtream
       assert_equal expected, actual
     end
 
+    def test_bigdecimal_column
+      row = Row.new([BigDecimal('1.5')], 1)
+      actual = row.to_xml
+      expected = '<row r="1"><c r="A1" s="3" t="n"><v>1.5</v></c></row>'
+      assert_equal expected, actual
+    end
+
     def test_text_float_column
       row = Row.new(['1.5'], 1, auto_format: true)
       actual = row.to_xml
