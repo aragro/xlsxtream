@@ -1,6 +1,6 @@
 # frozen_string_literal: true
-require "xlsxtream/xml"
-require "xlsxtream/row"
+require 'xlsxtream/xml'
+require 'xlsxtream/row'
 
 module Xlsxtream
   class Worksheet
@@ -17,7 +17,7 @@ module Xlsxtream
       @io << Row.new(row, @rownum, @options).to_xml
       @rownum += 1
     end
-    alias_method :add_row, :<<
+    alias add_row <<
 
     def close
       write_footer
@@ -45,9 +45,7 @@ module Xlsxtream
       XML
 
       columns = Array(@options[:columns])
-      unless columns.empty?
-        @io << Columns.new(columns).to_xml
-      end
+      @io << Columns.new(columns).to_xml unless columns.empty?
 
       @io << XML.strip(<<-XML)
           <sheetData>

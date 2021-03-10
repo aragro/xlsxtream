@@ -9,5 +9,8 @@ require:
 AllCops:
   NewCops: enable
 
+Rails/RefuteMethods:
+  Enabled: false
+
 Style/Documentation:
   Enabled: false

@@ -1,24 +1,22 @@
 # frozen_string_literal: true
-require "xlsxtream/errors"
-require "xlsxtream/xml"
-require "xlsxtream/shared_string_table"
-require "xlsxtream/worksheet"
-require "xlsxtream/io/zip_tricks"
+require 'xlsxtream/errors'
+require 'xlsxtream/xml'
+require 'xlsxtream/shared_string_table'
+require 'xlsxtream/worksheet'
+require 'xlsxtream/io/zip_tricks'
 
 module Xlsxtream
   class Workbook
-
     FONT_FAMILY_IDS = {
-      ''           => 0,
-      'roman'      => 1,
-      'swiss'      => 2,
-      'modern'     => 3,
-      'script'     => 4,
+      '' => 0,
+      'roman' => 1,
+      'swiss' => 2,
+      'modern' => 3,
+      'script' => 4,
       'decorative' => 5
     }.freeze
 
     class << self
-
       def open(output, options = {})
         workbook = new(output, options)
         if block_given?
@@ -31,18 +29,16 @@ module Xlsxtream
           workbook
         end
       end
-
     end
 
     def initialize(output, options = {})
-      if output.nil?
-        fail Error, "Xlsxtream::Workbook.new output cannot be nil"
-      end
+      raise Error, 'Xlsxtream::Workbook.new output cannot be nil' if output.nil?
+
       @options = options
       if options[:io_wrapper]
-        fail Deprecation,
-          "The Xlsxtream::Workbook.new :io_wrapper option is deprecated. "\
-          "Please pass an IO wrapper instance as the first argument instead."
+        raise Deprecation,
+              'The Xlsxtream::Workbook.new :io_wrapper option is deprecated. '\
+              'Please pass an IO wrapper instance as the first argument instead.'
       end
       if output.is_a?(String) || !output.respond_to?(:<<)
         @file = File.open(output, 'wb')
@@ -59,16 +55,14 @@ module Xlsxtream
     end
 
     def add_worksheet(*args, &block)
-      if block_given?
+      if block
         # This method used to be an alias for `write_worksheet`. This was never publicly documented,
         # but to avoid breaking this private API we keep the old behaviour when called with a block.
-        Kernel.warn "#{caller.first[/.*:\d+:(?=in `)/]} warning: Calling #{self.class}#add_worksheet with a block is deprecated, use #write_worksheet instead."
+        Kernel.warn "#{caller(1..1).first[/.*:\d+:(?=in `)/]} warning: Calling #{self.class}#add_worksheet with a block is deprecated, use #write_worksheet instead."
         return write_worksheet(*args, &block)
       end
 
-      unless @worksheets.all? { |ws| ws.closed? }
-        fail Error, "Close the current worksheet before adding a new one"
-      end
+      raise Error, 'Close the current worksheet before adding a new one' unless @worksheets.all? { |ws| ws.closed? }
 
       build_worksheet(*args)
     end
@@ -90,13 +84,14 @@ module Xlsxtream
       write_root_rels
       write_content_types
       @io.close if @io.respond_to? :close
-      @file.close if @file
+      @file&.close
       nil
     end
 
     private
+
     def build_worksheet(name = nil, options = {})
-      if name.is_a? Hash and options.empty?
+      if name.is_a?(Hash) && options.empty?
         options = name
         name = nil
       end
@@ -118,7 +113,7 @@ module Xlsxtream
     end
 
     def write_root_rels
-      @io.add_file "_rels/.rels"
+      @io.add_file '_rels/.rels'
       @io << XML.header
       @io << XML.strip(<<-XML)
         <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
@@ -128,8 +123,8 @@ module Xlsxtream
     end
 
     def write_workbook
-      rid = String.new("rId0")
-      @io.add_file "xl/workbook.xml"
+      rid = +'rId0'
+      @io.add_file 'xl/workbook.xml'
       @io << XML.header
       @io << XML.strip(<<-XML)
         <workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
@@ -137,7 +132,7 @@ module Xlsxtream
           <sheets>
       XML
       @worksheets.each do |worksheet|
-        @io << %'<sheet name="#{XML.escape_attr worksheet.name}" sheetId="#{worksheet.id}" r:id="#{rid.next!}"/>'
+        @io << %(<sheet name="#{XML.escape_attr worksheet.name}" sheetId="#{worksheet.id}" r:id="#{rid.next!}"/>)
       end
       @io << XML.strip(<<-XML)
           </sheets>
@@ -150,11 +145,11 @@ module Xlsxtream
       font_size = font_options.fetch(:size, 12).to_s
       font_name = font_options.fetch(:name, 'Calibri').to_s
       font_family = font_options.fetch(:family, 'Swiss').to_s.downcase
-      font_family_id = FONT_FAMILY_IDS[font_family] or fail Error,
-        "Invalid font family #{font_family}, must be one of "\
-        + FONT_FAMILY_IDS.keys.map(&:inspect).join(', ')
+      font_family_id = FONT_FAMILY_IDS[font_family] or raise Error,
+                                                             "Invalid font family #{font_family}, must be one of "\
+                                                             + FONT_FAMILY_IDS.keys.map(&:inspect).join(', ')
 
-      @io.add_file "xl/styles.xml"
+      @io.add_file 'xl/styles.xml'
       @io << XML.header
       @io << XML.strip(<<-XML)
         <styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
@@ -198,9 +193,9 @@ module Xlsxtream
     end
 
     def write_sst
-      @io.add_file "xl/sharedStrings.xml"
+      @io.add_file 'xl/sharedStrings.xml'
       @io << XML.header
-      @io << %'<sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" count="#{@sst.references}" uniqueCount="#{@sst.size}">'
+      @io << %(<sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" count="#{@sst.references}" uniqueCount="#{@sst.size}">)
       @sst.each_key do |string|
         @io << "<si><t>#{XML.escape_value string}</t></si>"
       end
@@ -208,20 +203,20 @@ module Xlsxtream
     end
 
     def write_workbook_rels
-      rid = String.new("rId0")
-      @io.add_file "xl/_rels/workbook.xml.rels"
+      rid = +'rId0'
+      @io.add_file 'xl/_rels/workbook.xml.rels'
       @io << XML.header
       @io << '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
       @worksheets.each do |worksheet|
-        @io << %'<Relationship Id="#{rid.next!}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet#{worksheet.id}.xml"/>'
+        @io << %(<Relationship Id="#{rid.next!}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet#{worksheet.id}.xml"/>)
       end
-      @io << %'<Relationship Id="#{rid.next!}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>'
-      @io << %'<Relationship Id="#{rid.next!}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings" Target="sharedStrings.xml"/>' unless @sst.empty?
+      @io << %(<Relationship Id="#{rid.next!}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>)
+      @io << %(<Relationship Id="#{rid.next!}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings" Target="sharedStrings.xml"/>) unless @sst.empty?
       @io << '</Relationships>'
     end
 
     def write_content_types
-      @io.add_file "[Content_Types].xml"
+      @io.add_file '[Content_Types].xml'
       @io << XML.header
       @io << XML.strip(<<-XML)
         <Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
@@ -232,7 +227,7 @@ module Xlsxtream
       XML
       @io << '<Override PartName="/xl/sharedStrings.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml"/>' unless @sst.empty?
       @worksheets.each do |worksheet|
-        @io << %'<Override PartName="/xl/worksheets/sheet#{worksheet.id}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>'
+        @io << %(<Override PartName="/xl/worksheets/sheet#{worksheet.id}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>)
       end
       @io << '</Types>'
     end

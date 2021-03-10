@@ -59,7 +59,7 @@ module Xlsxtream
 
     def test_add_columns_via_worksheet_options
       io = StringIO.new
-      ws = Worksheet.new(io, { columns: [ {}, {}, { width_pixels: 42 } ] } )
+      ws = Worksheet.new(io, { columns: [{}, {}, { width_pixels: 42 }] })
       ws.close
       expected = \
         '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'"\r\n" \
@@ -74,7 +74,7 @@ module Xlsxtream
 
     def test_add_columns_via_worksheet_options_and_add_rows
       io = StringIO.new
-      ws = Worksheet.new(io, { columns: [ {}, {}, { width_pixels: 42 } ] } )
+      ws = Worksheet.new(io, { columns: [{}, {}, { width_pixels: 42 }] })
       ws << ['foo']
       ws.add_row ['bar']
       ws.close

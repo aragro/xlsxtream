@@ -7,7 +7,6 @@ require 'xlsxtream/io/hash'
 
 module Xlsxtream
   class WorksheetTest < Minitest::Test
-
     def test_workbook_from_path
       tempfile = Tempfile.new('xlsxtream')
       Workbook.open(tempfile.path) {}
@@ -316,7 +315,7 @@ module Xlsxtream
     def test_worksheet_name_as_option
       iow_spy = io_wrapper_spy
       Workbook.open(iow_spy) do |workbook|
-        workbook.write_worksheet(name: "foo")
+        workbook.write_worksheet(name: 'foo')
       end
       expected = '<sheet name="foo" sheetId="1" r:id="rId1"/>'
       actual = iow_spy['xl/workbook.xml'][/<sheet [^>]+>/]
@@ -325,7 +324,7 @@ module Xlsxtream
 
     def test_add_columns_via_workbook_options
       iow_spy = io_wrapper_spy
-      Workbook.open(iow_spy, { columns: [ {}, {}, { width_pixels: 42 } ] } ) do |wb|
+      Workbook.open(iow_spy, { columns: [{}, {}, { width_pixels: 42 }] }) do |wb|
         wb.write_worksheet {}
       end
 
@@ -344,7 +343,7 @@ module Xlsxtream
 
     def test_add_columns_via_workbook_options_and_add_rows
       iow_spy = io_wrapper_spy
-      Workbook.open(iow_spy, { columns: [ {}, {}, { width_pixels: 42 } ] } ) do |wb|
+      Workbook.open(iow_spy, { columns: [{}, {}, { width_pixels: 42 }] }) do |wb|
         wb.write_worksheet do |ws|
           ws << ['foo']
           ws.add_row ['bar']
@@ -443,7 +442,7 @@ module Xlsxtream
     def test_font_family_mapping
       tests = {
         nil => 0,
-        ''  => 0,
+        '' => 0,
         'ROMAN' => 1,
         :roman => 1,
         'Roman' => 1,
@@ -473,7 +472,7 @@ module Xlsxtream
     def test_tempfile_is_not_closed
       tempfile = Tempfile.new('workbook')
       Workbook.open(tempfile) {}
-      assert_equal false, tempfile.closed?
+      refute tempfile.closed?
     ensure
       tempfile && tempfile.close!
     end
@@ -485,11 +484,11 @@ module Xlsxtream
     end
 
     def silence_warnings
-      old_verbose, $VERBOSE = $VERBOSE, nil
+      old_verbose = $VERBOSE
+      $VERBOSE = nil
       yield
     ensure
       $VERBOSE = old_verbose
     end
-
   end
 end
