@@ -297,7 +297,7 @@ module Xlsxtream
     def test_write_unnamed_worksheet_with_options
       iow_spy = io_wrapper_spy
       Workbook.open(iow_spy) do |wb|
-        wb.write_worksheet(:use_shared_strings => true)
+        wb.write_worksheet(use_shared_strings: true)
       end
 
       expected = \
@@ -325,7 +325,7 @@ module Xlsxtream
 
     def test_add_columns_via_workbook_options
       iow_spy = io_wrapper_spy
-      Workbook.open(iow_spy, { :columns => [ {}, {}, { :width_pixels => 42 } ] } ) do |wb|
+      Workbook.open(iow_spy, { columns: [ {}, {}, { width_pixels: 42 } ] } ) do |wb|
         wb.write_worksheet {}
       end
 
@@ -344,7 +344,7 @@ module Xlsxtream
 
     def test_add_columns_via_workbook_options_and_add_rows
       iow_spy = io_wrapper_spy
-      Workbook.open(iow_spy, { :columns => [ {}, {}, { :width_pixels => 42 } ] } ) do |wb|
+      Workbook.open(iow_spy, { columns: [ {}, {}, { width_pixels: 42 } ] } ) do |wb|
         wb.write_worksheet do |ws|
           ws << ['foo']
           ws.add_row ['bar']
@@ -415,8 +415,8 @@ module Xlsxtream
 
     def test_custom_font_size
       iow_spy = io_wrapper_spy
-      font_options = { :size => 23 }
-      Workbook.open(iow_spy, :font => font_options) {}
+      font_options = { size: 23 }
+      Workbook.open(iow_spy, font: font_options) {}
       expected = '<sz val="23"/>'
       actual = iow_spy['xl/styles.xml'][/<sz [^>]+>/]
       assert_equal expected, actual
@@ -424,8 +424,8 @@ module Xlsxtream
 
     def test_custom_font_name
       iow_spy = io_wrapper_spy
-      font_options = { :name => 'Comic Sans' }
-      Workbook.open(iow_spy, :font => font_options) {}
+      font_options = { name: 'Comic Sans' }
+      Workbook.open(iow_spy, font: font_options) {}
       expected = '<name val="Comic Sans"/>'
       actual = iow_spy['xl/styles.xml'][/<name [^>]+>/]
       assert_equal expected, actual
@@ -433,8 +433,8 @@ module Xlsxtream
 
     def test_custom_font_family
       iow_spy = io_wrapper_spy
-      font_options = { :family => 'Script' }
-      Workbook.open(iow_spy, :font => font_options) {}
+      font_options = { family: 'Script' }
+      Workbook.open(iow_spy, font: font_options) {}
       expected = '<family val="4"/>'
       actual = iow_spy['xl/styles.xml'][/<family [^>]+>/]
       assert_equal expected, actual
@@ -454,8 +454,8 @@ module Xlsxtream
       }
       tests.each do |value, id|
         iow_spy = io_wrapper_spy
-        font_options = { :family => value }
-        Workbook.open(iow_spy, :font => font_options) {}
+        font_options = { family: value }
+        Workbook.open(iow_spy, font: font_options) {}
         expected = "<family val=\"#{id}\"/>"
         actual = iow_spy['xl/styles.xml'][/<family [^>]+>/]
         assert_equal expected, actual
@@ -464,9 +464,9 @@ module Xlsxtream
 
     def test_invalid_font_family
       iow_spy = io_wrapper_spy
-      font_options = { :family => 'Foo' }
+      font_options = { family: 'Foo' }
       assert_raises Xlsxtream::Error do
-        Workbook.open(iow_spy, :font => font_options) {}
+        Workbook.open(iow_spy, font: font_options) {}
       end
     end
 

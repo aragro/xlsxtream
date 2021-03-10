@@ -37,11 +37,11 @@ module Xlsxtream
     end
 
     def test_text_boolean_column
-      row = Row.new(['true'], 1, :auto_format => true)
+      row = Row.new(['true'], 1, auto_format: true)
       actual = row.to_xml
       expected = '<row r="1"><c r="A1" t="b"><v>1</v></c></row>'
       assert_equal expected, actual
-      row = Row.new(['false'], 1, :auto_format => true)
+      row = Row.new(['false'], 1, auto_format: true)
       actual = row.to_xml
       expected = '<row r="1"><c r="A1" t="b"><v>0</v></c></row>'
       assert_equal expected, actual
@@ -55,7 +55,7 @@ module Xlsxtream
     end
 
     def test_text_integer_column
-      row = Row.new(['1'], 1, :auto_format => true)
+      row = Row.new(['1'], 1, auto_format: true)
       actual = row.to_xml
       expected = '<row r="1"><c r="A1" t="n"><v>1</v></c></row>'
       assert_equal expected, actual
@@ -69,7 +69,7 @@ module Xlsxtream
     end
 
     def test_text_float_column
-      row = Row.new(['1.5'], 1, :auto_format => true)
+      row = Row.new(['1.5'], 1, auto_format: true)
       actual = row.to_xml
       expected = '<row r="1"><c r="A1" t="n"><v>1.5</v></c></row>'
       assert_equal expected, actual
@@ -83,14 +83,14 @@ module Xlsxtream
     end
 
     def test_text_date_column
-      row = Row.new(['1900-01-01'], 1, :auto_format => true)
+      row = Row.new(['1900-01-01'], 1, auto_format: true)
       actual = row.to_xml
       expected = '<row r="1"><c r="A1" s="1"><v>2.0</v></c></row>'
       assert_equal expected, actual
     end
 
     def test_invalid_text_date_column
-      row = Row.new(['1900-02-29'], 1, :auto_format => true)
+      row = Row.new(['1900-02-29'], 1, auto_format: true)
       actual = row.to_xml
       expected = '<row r="1"><c r="A1" t="inlineStr"><is><t>1900-02-29</t></is></c></row>'
       assert_equal expected, actual
@@ -113,19 +113,19 @@ module Xlsxtream
         '1900-01-01T12:00:00.000000000Z'
       ]
       candidates.each do |timestamp|
-        row = Row.new([timestamp], 1, :auto_format => true)
+        row = Row.new([timestamp], 1, auto_format: true)
         actual = row.to_xml
         expected = '<row r="1"><c r="A1" s="2"><v>2.5</v></c></row>'
         assert_equal expected, actual
       end
-      row = Row.new(['1900-01-01T12'], 1, :auto_format => true)
+      row = Row.new(['1900-01-01T12'], 1, auto_format: true)
       actual = row.to_xml
       expected = '<row r="1"><c r="A1" s="2"><v>2.5</v></c></row>'
       refute_equal expected, actual
     end
 
     def test_invalid_text_date_time_column
-      row = Row.new(['1900-02-29T12:00'], 1, :auto_format => true)
+      row = Row.new(['1900-02-29T12:00'], 1, auto_format: true)
       actual = row.to_xml
       expected = '<row r="1"><c r="A1" t="inlineStr"><is><t>1900-02-29T12:00</t></is></c></row>'
       assert_equal expected, actual
@@ -140,7 +140,7 @@ module Xlsxtream
 
     def test_string_column_with_shared_string_table
       mock_sst = { 'hello' => 0 }
-      row = Row.new(['hello'], 1, :sst => mock_sst)
+      row = Row.new(['hello'], 1, sst: mock_sst)
       expected = '<row r="1"><c r="A1" t="s"><v>0</v></c></row>'
       actual = row.to_xml
       assert_equal expected, actual
