@@ -159,5 +159,12 @@ module Xlsxtream
       actual = row.to_xml
       assert_equal expected, actual
     end
+
+    def test_formula_column
+      row = Row.new(['=SUM(A1:A2)'], 1)
+      expected = '<row r="1"><c r="A1" t="str"><f>SUM(A1:A2)</f></c></row>'
+      actual = row.to_xml
+      assert_equal expected, actual
+    end
   end
 end

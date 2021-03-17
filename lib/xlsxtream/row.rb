@@ -58,7 +58,11 @@ module Xlsxtream
           unless value.empty? # no xml output for for empty strings
             value = value.encode(ENCODING) if value.encoding != ENCODING
 
-            xml << if @sst
+            xml << if value.start_with?('=')
+                     "<c r=\"#{cid}\" t=\"str\">" \
+                       "<f>#{XML.escape_value(value.sub('=', ''))}</f>" \
+                     '</c>'
+                   elsif @sst
                      %(<c r="#{cid}" t="s"><v>#{@sst[value]}</v></c>)
                    else
                      %(<c r="#{cid}" t="inlineStr"><is><t>#{XML.escape_value(value)}</t></is></c>)
