@@ -15,11 +15,15 @@ module Xlsxtream
     end
 
     def <<(row)
-      options = @has_header_row && @rownum == 1 ? @options.merge(:is_header => true) : @options
+      add_row(row)
+    end
+
+    def add_row(row, bold: false)
+      options = @options.merge(:bold => bold)
+      options[:is_header] = true if @has_header_row && @rownum == 1
       @io << Row.new(row, @rownum, options).to_xml
       @rownum += 1
     end
-    alias_method :add_row, :<<
 
     def close
       write_footer

@@ -178,6 +178,14 @@ module Xlsxtream
       assert_equal expected, row.to_xml
     end
 
+    def test_bold_row_preserves_type_specific_styles
+      row = Row.new(['Total', 1, 1.5, Date.new(2020, 1, 1), Time.new(2020, 1, 1, 12)], 2, :bold => true)
+      expected = '<row r="2"><c r="A2" s="7" t="inlineStr"><is><t>Total</t></is></c>' \
+        '<c r="B2" s="7" t="n"><v>1</v></c><c r="C2" s="10" t="n"><v>1.5</v></c>' \
+        '<c r="D2" s="8"><v>43831.0</v></c><c r="E2" s="9"><v>43831.5</v></c></row>'
+      assert_equal expected, row.to_xml
+    end
+
     # =========================================================================
     # Header rows
     # =========================================================================
@@ -235,14 +243,14 @@ module Xlsxtream
     def test_header_float_column
       row = Row.new([1.5], 1, is_header: true)
       actual = row.to_xml
-      expected = '<row r="1"><c r="A1" s="7" t="n"><v>1.5</v></c></row>'
+      expected = '<row r="1"><c r="A1" s="11" t="n"><v>1.5</v></c></row>'
       assert_equal expected, actual
     end
 
     def test_header_text_float_column
       row = Row.new(['1.5'], 1, :auto_format => true, is_header: true)
       actual = row.to_xml
-      expected = '<row r="1"><c r="A1" s="7" t="n"><v>1.5</v></c></row>'
+      expected = '<row r="1"><c r="A1" s="11" t="n"><v>1.5</v></c></row>'
       assert_equal expected, actual
     end
 

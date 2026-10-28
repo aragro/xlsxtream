@@ -173,7 +173,7 @@ module Xlsxtream
           <cellStyleXfs count="1">
             <xf numFmtId="0" fontId="0" fillId="0" borderId="0"/>
           </cellStyleXfs>
-          <cellXfs count="8">
+          <cellXfs count="12">
             <xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>
             <xf numFmtId="164" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>
             <xf numFmtId="165" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>
@@ -187,6 +187,10 @@ module Xlsxtream
               <alignment horizontal="center" vertical="center"/>
             </xf>
             <xf numFmtId="4" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>
+            <xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0"/>
+            <xf numFmtId="164" fontId="1" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>
+            <xf numFmtId="165" fontId="1" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>
+            <xf numFmtId="4" fontId="1" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>
             <xf numFmtId="4" fontId="1" fillId="0" borderId="0" xfId="0" applyAlignment="1" applyNumberFormat="1">
               <alignment horizontal="center" vertical="center"/>
             </xf>

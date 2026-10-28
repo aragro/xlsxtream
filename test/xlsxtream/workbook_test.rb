@@ -390,7 +390,7 @@ module Xlsxtream
       assert_equal expected, actual
     end
 
-    def test_archive_preserves_values_and_formulas
+    def test_styled_archive_preserves_values_and_formulas
       [false, true].each do |use_sst|
         [false, true].each do |auto_format|
           output = StringIO.new
@@ -399,9 +399,9 @@ module Xlsxtream
             Time.new(1900, 1, 1, 12, 30, 0, '+05:30'), '=SUM(C2:E2)', '=IF(C2<50,"A&B","_x0041_")']
           Workbook.open(output, use_shared_strings: use_sst, auto_format: auto_format) do |wb|
             wb.write_worksheet do |ws|
-              ws.add_row values
+              ws.add_row values, bold: true
               ws << values
-              ws.add_row values
+              ws.add_row values, bold: true
               ws.add_row values
             end
             wb.write_worksheet('Centered', has_header_row: true) do |ws|
@@ -416,7 +416,8 @@ module Xlsxtream
             fonts = styles[/<fonts[^>]*>(.*?)<\/fonts>/, 1].scan(/<font>.*?<\/font>/)
             rows = sheet.scan(/<row\b[^>]*>.*?<\/row>/)
             assert_equal 4, rows.size
-            rows.each do |row|
+            rows.each_with_index do |row, index|
+              bold = index.even?
               cells = row.scan(/<c\b[^>]*>.*?<\/c>/)
               expected_formats = [0, 0, 0, 4, 4, 164, 164, 165, 0, 0]
               cells.each_with_index do |cell, column|
@@ -424,7 +425,7 @@ module Xlsxtream
                 xf = xfs.fetch(style_id)
                 assert_equal expected_formats[column], xf[/numFmtId="(\d+)"/, 1].to_i
                 font = fonts.fetch(xf[/fontId="(\d+)"/, 1].to_i)
-                refute_includes font, '<b val="1"/>'
+                assert_equal bold, font.include?('<b val="1"/>')
                 refute_includes xf, '<alignment'
               end
               assert_includes cells[1], '<v>1</v>'
@@ -453,7 +454,7 @@ module Xlsxtream
       end
     end
 
-    def test_rows_stream_before_source_is_exhausted
+    def test_styled_rows_stream_before_source_is_exhausted
       output = StringIO.new
       row_count = 0
       emitted_at = []
@@ -464,22 +465,22 @@ module Xlsxtream
       end
       Workbook.open(sink) do |wb|
         wb.write_worksheet do |ws|
-          ws.add_row ['Header']
+          ws.add_row ['Header'], bold: true
           2000.times do |index|
             row_count += 1
             # Varied input exceeds both the writer buffer and deflate's output buffer.
             ws << [index, Array.new(40) { |column| "#{index * 7919 + column * 104729}" }.join('-')]
           end
-          ws.add_row ['Total', '=SUM(A2:A2001)']
+          ws.add_row ['Total', '=SUM(A2:A2001)'], bold: true
         end
       end
       assert emitted_at.any? { |count| count > 0 && count < 2000 }, emitted_at.inspect
       Zip::File.open_buffer(output.string) do |zip|
         sheet = zip.read('xl/worksheets/sheet1.xml')
         assert_equal 2002, sheet.scan(/<row\b/).size
-        assert_includes sheet, '<c r="B2002"><f>SUM(A2:A2001)</f></c>'
+        assert_includes sheet, '<c r="B2002" s="7"><f>SUM(A2:A2001)</f></c>'
         assert_includes sheet, '</sheetData></worksheet>'
-        assert_includes zip.read('xl/styles.xml'), '<cellXfs count="8">'
+        assert_includes zip.read('xl/styles.xml'), '<cellXfs count="12">'
       end
     end
 
@@ -520,7 +521,7 @@ module Xlsxtream
           '<cellStyleXfs count="1">' \
             '<xf numFmtId="0" fontId="0" fillId="0" borderId="0"/>' \
           '</cellStyleXfs>' \
-          '<cellXfs count="8">' \
+          '<cellXfs count="12">' \
             '<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>' \
             '<xf numFmtId="164" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>' \
             '<xf numFmtId="165" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>' \
@@ -534,6 +535,10 @@ module Xlsxtream
               '<alignment horizontal="center" vertical="center"/>' \
             '</xf>' \
             '<xf numFmtId="4" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>' \
+            '<xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0"/>' \
+            '<xf numFmtId="164" fontId="1" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>' \
+            '<xf numFmtId="165" fontId="1" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>' \
+            '<xf numFmtId="4" fontId="1" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>' \
             '<xf numFmtId="4" fontId="1" fillId="0" borderId="0" xfId="0" applyAlignment="1" applyNumberFormat="1">' \
               '<alignment horizontal="center" vertical="center"/>' \
             '</xf>' \
