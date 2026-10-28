@@ -19,7 +19,8 @@ module Xlsxtream
 
     STYLES = {
       normal: { general: nil, date: 1, time: 2, float: 6 },
-      header: { general: 3, date: 4, time: 5, float: 7 }
+      header: { general: 3, date: 4, time: 5, float: 11 },
+      bold: { general: 7, date: 8, time: 9, float: 10 }
     }.freeze
 
     def initialize(row, rownum, options = {})
@@ -27,7 +28,7 @@ module Xlsxtream
       @rownum = rownum
       @sst = options[:sst]
       @auto_format = options[:auto_format]
-      @style = STYLES[options[:is_header] ? :header : :normal]
+      @style = options[:is_header] ? STYLES[:header] : STYLES[options[:bold] ? :bold : :normal]
     end
 
     def to_xml

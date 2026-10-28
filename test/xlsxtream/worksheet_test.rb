@@ -57,6 +57,23 @@ module Xlsxtream
       assert_equal expected, io.string
     end
 
+    def test_add_bold_row
+      io = StringIO.new
+      ws = Worksheet.new(io)
+      ws.add_row ['header'], bold: true
+      ws << ['body']
+      ws.add_row ['total', 1.5], bold: true
+      ws.close
+      expected = \
+        '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'"\r\n" \
+        '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData>' \
+          '<row r="1"><c r="A1" s="7" t="inlineStr"><is><t>header</t></is></c></row>' \
+          '<row r="2"><c r="A2" t="inlineStr"><is><t>body</t></is></c></row>' \
+          '<row r="3"><c r="A3" s="7" t="inlineStr"><is><t>total</t></is></c><c r="B3" s="10" t="n"><v>1.5</v></c></row>' \
+        '</sheetData></worksheet>'
+      assert_equal expected, io.string
+    end
+
     def test_add_row_with_has_header_row_option
       io = StringIO.new
       ws = Worksheet.new(io, :has_header_row => true)
