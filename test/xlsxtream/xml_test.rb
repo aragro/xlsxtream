@@ -42,5 +42,28 @@ module Xlsxtream
       expected = safe_value
       assert_equal expected, XML.escape_value(safe_value)
     end
+
+    def test_encode_underscores_using_x005f
+      unsafe_value = "_xDcc2_"
+      safe_value = "_x005f_xDcc2_"
+      assert_equal safe_value, XML.escape_value(unsafe_value)
+    end
+
+    def test_encode_underscores_using_x005f_multiple_occurrences
+      unsafe_value = "_xDcc2_aa_x3d12_bb_xDea3_cc_xDaa5_"
+      safe_value = "_x005f_xDcc2_aa_x005f_x3d12_bb_x005f_xDea3_cc_x005f_xDaa5_"
+      assert_equal safe_value, XML.escape_value(unsafe_value)
+    end
+
+    def test_not_escaping_regular_underscores
+      safe_value = "this_test_does_not_replace_underscores_xDcc2"
+      assert_equal safe_value, XML.escape_value(safe_value)
+    end
+
+    def test_escape_formula_keeps_st_xstring_literals
+      formula = 'IF(A1<2,"A&B","_x0041_")'
+      expected = 'IF(A1&lt;2,"A&amp;B","_x0041_")'
+      assert_equal expected, XML.escape_formula(formula)
+    end
   end
 end
