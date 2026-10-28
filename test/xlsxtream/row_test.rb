@@ -4,6 +4,11 @@ require 'xlsxtream/row'
 
 module Xlsxtream
   class RowTest < Minitest::Test
+
+    # =========================================================================
+    # Normal rows
+    # =========================================================================
+
     def test_empty_column
       row = Row.new([nil], 1)
       expected = '<row r="1"></row>'
@@ -37,11 +42,11 @@ module Xlsxtream
     end
 
     def test_text_boolean_column
-      row = Row.new(['true'], 1, auto_format: true)
+      row = Row.new(['true'], 1, :auto_format => true)
       actual = row.to_xml
       expected = '<row r="1"><c r="A1" t="b"><v>1</v></c></row>'
       assert_equal expected, actual
-      row = Row.new(['false'], 1, auto_format: true)
+      row = Row.new(['false'], 1, :auto_format => true)
       actual = row.to_xml
       expected = '<row r="1"><c r="A1" t="b"><v>0</v></c></row>'
       assert_equal expected, actual
@@ -55,7 +60,7 @@ module Xlsxtream
     end
 
     def test_text_integer_column
-      row = Row.new(['1'], 1, auto_format: true)
+      row = Row.new(['1'], 1, :auto_format => true)
       actual = row.to_xml
       expected = '<row r="1"><c r="A1" t="n"><v>1</v></c></row>'
       assert_equal expected, actual
@@ -64,21 +69,21 @@ module Xlsxtream
     def test_float_column
       row = Row.new([1.5], 1)
       actual = row.to_xml
-      expected = '<row r="1"><c r="A1" s="3" t="n"><v>1.5</v></c></row>'
+      expected = '<row r="1"><c r="A1" s="6" t="n"><v>1.5</v></c></row>'
       assert_equal expected, actual
     end
 
-    def test_bigdecimal_column
-      row = Row.new([BigDecimal('1.5')], 1)
+    def test_bigdecimal_column_without_float_conversion
+      row = Row.new([BigDecimal('123456789.123456789')], 1)
       actual = row.to_xml
-      expected = '<row r="1"><c r="A1" s="3" t="n"><v>1.5</v></c></row>'
+      expected = '<row r="1"><c r="A1" s="6" t="n"><v>123456789.123456789</v></c></row>'
       assert_equal expected, actual
     end
 
     def test_text_float_column
-      row = Row.new(['1.5'], 1, auto_format: true)
+      row = Row.new(['1.5'], 1, :auto_format => true)
       actual = row.to_xml
-      expected = '<row r="1"><c r="A1" s="3" t="n"><v>1.5</v></c></row>'
+      expected = '<row r="1"><c r="A1" s="6" t="n"><v>1.5</v></c></row>'
       assert_equal expected, actual
     end
 
@@ -90,14 +95,14 @@ module Xlsxtream
     end
 
     def test_text_date_column
-      row = Row.new(['1900-01-01'], 1, auto_format: true)
+      row = Row.new(['1900-01-01'], 1, :auto_format => true)
       actual = row.to_xml
       expected = '<row r="1"><c r="A1" s="1"><v>2.0</v></c></row>'
       assert_equal expected, actual
     end
 
     def test_invalid_text_date_column
-      row = Row.new(['1900-02-29'], 1, auto_format: true)
+      row = Row.new(['1900-02-29'], 1, :auto_format => true)
       actual = row.to_xml
       expected = '<row r="1"><c r="A1" t="inlineStr"><is><t>1900-02-29</t></is></c></row>'
       assert_equal expected, actual
@@ -120,19 +125,19 @@ module Xlsxtream
         '1900-01-01T12:00:00.000000000Z'
       ]
       candidates.each do |timestamp|
-        row = Row.new([timestamp], 1, auto_format: true)
+        row = Row.new([timestamp], 1, :auto_format => true)
         actual = row.to_xml
         expected = '<row r="1"><c r="A1" s="1"><v>2.5</v></c></row>'
         assert_equal expected, actual
       end
-      row = Row.new(['1900-01-01T12'], 1, auto_format: true)
+      row = Row.new(['1900-01-01T12'], 1, :auto_format => true)
       actual = row.to_xml
-      expected = '<row r="1"><c r="A1" s="2"><v>2.5</v></c></row>'
+      expected = '<row r="1"><c r="A1" s="1"><v>2.5</v></c></row>'
       refute_equal expected, actual
     end
 
     def test_invalid_text_date_time_column
-      row = Row.new(['1900-02-29T12:00'], 1, auto_format: true)
+      row = Row.new(['1900-02-29T12:00'], 1, :auto_format => true)
       actual = row.to_xml
       expected = '<row r="1"><c r="A1" t="inlineStr"><is><t>1900-02-29T12:00</t></is></c></row>'
       assert_equal expected, actual
@@ -147,7 +152,7 @@ module Xlsxtream
 
     def test_string_column_with_shared_string_table
       mock_sst = { 'hello' => 0 }
-      row = Row.new(['hello'], 1, sst: mock_sst)
+      row = Row.new(['hello'], 1, :sst => mock_sst)
       expected = '<row r="1"><c r="A1" t="s"><v>0</v></c></row>'
       actual = row.to_xml
       assert_equal expected, actual
@@ -160,11 +165,164 @@ module Xlsxtream
       assert_equal expected, actual
     end
 
-    def test_formula_column
-      row = Row.new(['=SUM(A1:A2)'], 1)
-      expected = '<row r="1"><c r="A1" t="str"><f>SUM(A1:A2)</f></c></row>'
+    def test_formula_column_with_xml_escaping
+      row = Row.new(['=IF(A1<2,"A&B","_x0041_")'], 1)
+      expected = '<row r="1"><c r="A1"><f>IF(A1&lt;2,"A&amp;B","_x0041_")</f></c></row>'
+      assert_equal expected, row.to_xml
+    end
+
+    def test_formula_column_with_shared_strings_and_auto_format
+      sst = Hash.new { raise 'formula must not be added to the shared string table' }
+      row = Row.new(['=SUM(A1:A2)'], 1, :sst => sst, :auto_format => true)
+      expected = '<row r="1"><c r="A1"><f>SUM(A1:A2)</f></c></row>'
+      assert_equal expected, row.to_xml
+    end
+
+    # =========================================================================
+    # Header rows
+    # =========================================================================
+
+    def test_header_string_column
+      row = Row.new(['hello'], 1, is_header: true)
+      expected = '<row r="1"><c r="A1" s="3" t="inlineStr"><is><t>hello</t></is></c></row>'
       actual = row.to_xml
       assert_equal expected, actual
     end
+
+    def test_header_symbol_column
+      row = Row.new([:hello], 1, is_header: true)
+      expected = '<row r="1"><c r="A1" s="3" t="inlineStr"><is><t>hello</t></is></c></row>'
+      actual = row.to_xml
+      assert_equal expected, actual
+    end
+
+    def test_header_boolean_column
+      row = Row.new([true], 1, is_header: true)
+      actual = row.to_xml
+      expected = '<row r="1"><c r="A1" s="3" t="b"><v>1</v></c></row>'
+      assert_equal expected, actual
+      row = Row.new([false], 1, is_header: true)
+      actual = row.to_xml
+      expected = '<row r="1"><c r="A1" s="3" t="b"><v>0</v></c></row>'
+      assert_equal expected, actual
+    end
+
+    def test_header_text_boolean_column
+      row = Row.new(['true'], 1, :auto_format => true, is_header: true)
+      actual = row.to_xml
+      expected = '<row r="1"><c r="A1" s="3" t="b"><v>1</v></c></row>'
+      assert_equal expected, actual
+      row = Row.new(['false'], 1, :auto_format => true, is_header: true)
+      actual = row.to_xml
+      expected = '<row r="1"><c r="A1" s="3" t="b"><v>0</v></c></row>'
+      assert_equal expected, actual
+    end
+
+    def test_header_integer_column
+      row = Row.new([1], 1, is_header: true)
+      actual = row.to_xml
+      expected = '<row r="1"><c r="A1" s="3" t="n"><v>1</v></c></row>'
+      assert_equal expected, actual
+    end
+
+    def test_header_text_integer_column
+      row = Row.new(['1'], 1, :auto_format => true, is_header: true)
+      actual = row.to_xml
+      expected = '<row r="1"><c r="A1" s="3" t="n"><v>1</v></c></row>'
+      assert_equal expected, actual
+    end
+
+    def test_header_float_column
+      row = Row.new([1.5], 1, is_header: true)
+      actual = row.to_xml
+      expected = '<row r="1"><c r="A1" s="7" t="n"><v>1.5</v></c></row>'
+      assert_equal expected, actual
+    end
+
+    def test_header_text_float_column
+      row = Row.new(['1.5'], 1, :auto_format => true, is_header: true)
+      actual = row.to_xml
+      expected = '<row r="1"><c r="A1" s="7" t="n"><v>1.5</v></c></row>'
+      assert_equal expected, actual
+    end
+
+    def test_header_date_column
+      row = Row.new([Date.new(1900, 1, 1)], 1, is_header: true)
+      actual = row.to_xml
+      expected = '<row r="1"><c r="A1" s="4"><v>2.0</v></c></row>'
+      assert_equal expected, actual
+    end
+
+    def test_header_text_date_column
+      row = Row.new(['1900-01-01'], 1, :auto_format => true, is_header: true)
+      actual = row.to_xml
+      expected = '<row r="1"><c r="A1" s="4"><v>2.0</v></c></row>'
+      assert_equal expected, actual
+    end
+
+    def test_header_invalid_text_date_column
+      row = Row.new(['1900-02-29'], 1, :auto_format => true, is_header: true)
+      actual = row.to_xml
+      expected = '<row r="1"><c r="A1" s="3" t="inlineStr"><is><t>1900-02-29</t></is></c></row>'
+      assert_equal expected, actual
+    end
+
+    def test_header_date_time_column
+      row = Row.new([DateTime.new(1900, 1, 1, 12, 0, 0, '+00:00')], 1, is_header: true)
+      actual = row.to_xml
+      expected = '<row r="1"><c r="A1" s="4"><v>2.5</v></c></row>'
+      assert_equal expected, actual
+    end
+
+    def test_header_text_date_time_column
+      candidates = [
+        '1900-01-01T12:00',
+        '1900-01-01T12:00Z',
+        '1900-01-01T12:00+00:00',
+        '1900-01-01T12:00:00+00:00',
+        '1900-01-01T12:00:00.000+00:00',
+        '1900-01-01T12:00:00.000000000Z'
+      ]
+      candidates.each do |timestamp|
+        row = Row.new([timestamp], 1, :auto_format => true, is_header: true)
+        actual = row.to_xml
+        expected = '<row r="1"><c r="A1" s="4"><v>2.5</v></c></row>'
+        assert_equal expected, actual
+      end
+      row = Row.new(['1900-01-01T12'], 1, :auto_format => true, is_header: true)
+      actual = row.to_xml
+      expected = '<row r="1"><c r="A1" s="4"><v>2.5</v></c></row>'
+      refute_equal expected, actual
+    end
+
+    def test_header_invalid_text_date_time_column
+      row = Row.new(['1900-02-29T12:00'], 1, :auto_format => true, is_header: true)
+      actual = row.to_xml
+      expected = '<row r="1"><c r="A1" s="3" t="inlineStr"><is><t>1900-02-29T12:00</t></is></c></row>'
+      assert_equal expected, actual
+    end
+
+    def test_header_time_column
+      row = Row.new([Time.new(1900, 1, 1, 12, 0, 0, '+00:00')], 1, is_header: true)
+      actual = row.to_xml
+      expected = '<row r="1"><c r="A1" s="5"><v>2.5</v></c></row>'
+      assert_equal expected, actual
+    end
+
+    def test_header_string_column_with_shared_string_table
+      mock_sst = { 'hello' => 0 }
+      row = Row.new(['hello'], 1, :sst => mock_sst, is_header: true)
+      expected = '<row r="1"><c r="A1" s="3" t="s"><v>0</v></c></row>'
+      actual = row.to_xml
+      assert_equal expected, actual
+    end
+
+    def test_header_multiple_columns
+      row = Row.new(['foo', nil, 23], 1, is_header: true)
+      expected = '<row r="1"><c r="A1" s="3" t="inlineStr"><is><t>foo</t></is></c><c r="C1" s="3" t="n"><v>23</v></c></row>'
+      actual = row.to_xml
+      assert_equal expected, actual
+    end
+
   end
 end

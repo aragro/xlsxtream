@@ -1,8 +1,21 @@
 # Changelog
 
-## 2.5.0 (2020-06-27)
+## 3.2.0 (2025-01-08)
 
-- Change dependency from zip_tricks to zip_kit
+- New `:has_header_row` worksheet and workbook option, causing first row of spreadsheet to use bold, centred text
+
+## 3.1.0 (2024-12-28)
+
+- Escape strings that look like Excel escape sequences (#56)
+
+## 3.0.0 (2024-12-28)
+
+- Change dependency from zip\_tricks to zip\_kit (#57)
+- Switch from Travis-CI to Github Actions (#58)
+- Allow ZipKit streamer to be passed in as output destination (#59)
+- Remove IO wrappers and leave just the ZIP output wrapper (#59)
+- Ensure the gem can use the ZipKit Rails streaming helper for output (#59)
+- Drop support for Ruby < 2.6.0 (required for zip\_kit gem)
 
 ## 2.4.0 (2020-06-27)
 
